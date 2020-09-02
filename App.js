@@ -33,12 +33,15 @@ const App = () => {
     }
   }
 
-
+  const openEditor = () => {
+    console.log('editor open!')
+  }
 
   return <Viewer
     cocktails={cocktails}
     selected={selected}
     select={select}
+    openEditor={openEditor}
   />
 }
 

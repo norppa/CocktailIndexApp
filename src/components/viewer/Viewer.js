@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { StyleSheet, View, Text, TextInput,  FlatList } from 'react-native'
+import { StyleSheet, View, Text, TextInput, FlatList } from 'react-native'
+import Icon from 'react-native-vector-icons/FontAwesome'
 import Cocktail from './Cocktail'
 
 const Viewer = (props) => {
@@ -11,6 +12,7 @@ const Viewer = (props) => {
         <View style={styles.textInput}>
           <TextInput type="text" value={searchInput} onChange={event => setSearchInput(event.nativeEvent.text)} />
         </View>
+        <Icon name="edit" size={35} onPress={props.openEditor} />
       </View>
 
       <FlatList
@@ -46,13 +48,14 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 10
   },
   textInput: {
     width: '80%',
     borderWidth: 1,
     borderRadius: 10,
-    marginRight: 10
+    marginRight: 15
   },
   list: {
     width: '100%',
