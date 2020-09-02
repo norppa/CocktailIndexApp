@@ -3,10 +3,12 @@ import { StyleSheet, View, Text } from 'react-native'
 import { getCocktails } from './src/utils/utils'
 
 import Viewer from './src/components/viewer/Viewer'
+import Editor from './src/components/editor/Editor'
 
 const App = () => {
   const [cocktails, setCocktails] = useState([])
   const [selected, setSelected] = useState(null)
+  const [editorOpen, setEditorOpen] = useState(false)
 
   React.useEffect(() => {
     initialize()
@@ -34,7 +36,15 @@ const App = () => {
   }
 
   const openEditor = () => {
-    console.log('editor open!')
+    setEditorOpen(true)
+  }
+
+  const closeEditor = () => {
+    setEditorOpen(false)
+  }
+
+  if (editorOpen) {
+    return <Editor closeEditor={closeEditor} />
   }
 
   return <Viewer
