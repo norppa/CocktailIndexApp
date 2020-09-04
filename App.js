@@ -23,7 +23,6 @@ const App = () => {
       // writeLocalStore(cocktails)
     }
     setCocktails(cocktails)
-    console.log('cocktails', cocktails)
 
   }
 
@@ -43,8 +42,10 @@ const App = () => {
     setEditorOpen(false)
   }
 
+  console.log('selected', selected)
+
   if (editorOpen) {
-    return <Editor closeEditor={closeEditor} />
+    return <Editor cocktail={cocktails[selected]} closeEditor={closeEditor} />
   }
 
   return <Viewer

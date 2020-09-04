@@ -32,6 +32,7 @@ const Viewer = (props) => {
         }}
         keyExtractor={(item, index) => index + item.name}
       />
+
     </View>
   )
 }
