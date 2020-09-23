@@ -4,30 +4,8 @@ import images from '../../assets/images/glasses'
 
 const Cocktail = (props) => {
     const [showAdditionalInfo, setShowAdditionalInfo] = useState(false)
-    // let [fontsLoaded] = useFonts({ CherryCreamSoda_400Regular, Alegreya_500Medium, Alegreya_700Bold })
 
-    const handleClick = () => {
-        if (props.selected && showAdditionalInfo) {
-            setShowAdditionalInfo(false)
-            props.select()
-        } else if (!props.selected && !showAdditionalInfo) {
-            setShowAdditionalInfo(true)
-            props.select()
-        } else if (!props.selected && showAdditionalInfo) {
-            setShowAdditionalInfo(false)
-        } else if (props.selected && !showAdditionalInfo) {
-            // impossible by logic
-            setShowAdditionalInfo(true)
-        }
-    }
-    // const handleClick = () => {
-    //     if (showFullInfo) {
-    //         setShowFullInfo(false)
-    //     } else {
-    //         setShowFullInfo(true)
-    //         props.scrollTo(props.index)
-    //     }
-    // }
+    const handleClick = () => setShowAdditionalInfo(showAdditionalInfo => !showAdditionalInfo)
 
     const CocktailText = props => {
         return (
@@ -144,9 +122,5 @@ const styles = StyleSheet.create({
     method: {
         fontFamily: 'Alegreya-Bold',
         fontSize: 18,
-    },
-    selected: {
-        borderWidth: 3
     }
-
 })

@@ -1,12 +1,14 @@
 import React from 'react'
 import { StyleSheet, View, Image, Text, TouchableWithoutFeedback } from 'react-native'
-import images from '../../assets/images/glasses'
+import images from '../../img/images'
+
+
 
 const GlassCard = (props) => {
     return (
         <TouchableWithoutFeedback onPress={props.select}>
             <View style={[props.style, styles.glassCard]}>
-                <Image style={styles.image} source={images[props.glass]} />
+                <Image style={styles.image} source={images(props.glass)} />
                 <Text style={styles.text}>{props.glass}</Text>
             </View>
         </TouchableWithoutFeedback>
@@ -29,7 +31,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     text: {
-        fontFamily: 'Alegreya-Medium',
+        fontFamily: 'Alegreya-Medium'   ,
         fontSize: 20,
     }
 })

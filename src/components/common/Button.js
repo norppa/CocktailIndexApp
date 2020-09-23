@@ -7,7 +7,7 @@ const EditorButton = (props) => {
             activeOpacity={0.6}
             underlayColor="#DDDDDD"
             onPress={props.onPress}>
-            <Text style={[styles.buttonText, props.style]}>{props.title}</Text>
+            <Text style={[styles.buttonText]}>{props.title}</Text>
         </TouchableHighlight>
     )
 }
@@ -16,7 +16,6 @@ export default EditorButton
 
 const styles = StyleSheet.create({
     button: {
-        width: '40%',
         borderWidth: 3,
         borderRadius: 5,
         padding: 5,

@@ -1,63 +1,126 @@
-import React, { useState } from 'react'
-import { StyleSheet, View, Text } from 'react-native'
-import { getCocktails } from './src/utils/utils'
+import React, { useEffect, useState } from 'react'
+import { View, Text } from 'react-native'
+import { getAvailable, cocktailsApi } from './src/utils/apiUtils'
+import { getStorageValue, setStorageValue, delStorageValue } from './src/utils/storageUtils'
 
 import Viewer from './src/components/viewer/Viewer'
 import Editor from './src/components/editor/Editor'
+import Login from './src/components/login/Login'
+
+const screens = {
+  LOGIN: 'login',
+  VIEWER: 'viewer',
+  EDITOR: 'editor',
+  ERROR: 'error'
+}
+
+const TOKEN_KEY = '@CocktailIndexToken'
 
 const App = () => {
+  const [token, setToken] = useState(false)
   const [cocktails, setCocktails] = useState([])
-  const [selected, setSelected] = useState(null)
-  const [editorOpen, setEditorOpen] = useState(false)
+  const [screen, setScreen] = useState('')
 
-  React.useEffect(() => {
-    initialize()
+  const [availableMethods, setAvailableMethods] = useState(false)
+  const [availableGlasses, setAvailableGlasses] = useState(false)
+
+  useEffect(() => {
+    const asyncWrapper = async () => {
+      const token = await getStorageValue(TOKEN_KEY)
+      initialize(token)
+    }
+    asyncWrapper()
+
   }, [])
 
-  const initialize = async () => {
-    let cocktails = await getCocktails()
+  const initialize = async (token) => {
+    if (!token) {
+      return setScreen(screens.LOGIN)
+
+    }
+
+    const cocktails = await cocktailsApi.get(token)
     if (cocktails.error) {
-      console.log('could not read database (' + cocktails.error + '), using local storage')
-      // cocktails = readLocalStore()
-    } else {
-      // writeLocalStore(cocktails)
+      return console.log('closeLogin error', cocktails.error)
     }
+
+    setStorageValue(TOKEN_KEY, token)
+    setToken(token)
     setCocktails(cocktails)
-
+    setScreen(screens.VIEWER)
   }
 
-  const select = (index) => {
-    if (selected == index) {
-      setSelected(null)
-    } else {
-      setSelected(index)
+  const closeLogin = async (token) => {
+    await initialize(token)
+  }
+
+  const logout = () => {
+    setToken(false)
+    setCocktails([])
+    setScreen(screens.LOGIN)
+  }
+
+  const openEditor = async () => {
+    if (!availableMethods || !availableGlasses) {
+      const availableMethods = await getAvailable('methods', token)
+      const availableGlasses = await getAvailable('glasses', token)
+      setAvailableMethods(availableMethods)
+      setAvailableGlasses(availableGlasses)
     }
-  }
-
-  const openEditor = () => {
-    setEditorOpen(true)
+    setScreen(screens.EDITOR)
   }
 
   const closeEditor = () => {
-    setEditorOpen(false)
+    setScreen(screens.VIEWER)
   }
 
-  console.log('selected', selected)
-
-  if (editorOpen) {
-    return <Editor cocktail={cocktails[selected]} closeEditor={closeEditor} />
+  const saveCocktail = async (cocktail) => {
+    const storedCocktail = await cocktailsApi.save(token, cocktail)
+    console.log('saveCocktail, storedCocktail', storedCocktail)
+    if (cocktail.id) {
+      setCocktails(cocktails => cocktails.map(c => {
+        if (c.id == cocktail.id) {
+          return storedCocktail
+        } else {
+          return c
+        }
+      }))
+    } else {
+      setCocktails(cocktails => cocktails.concat(storedCocktail))
+    }
+    setScreen(screens.VIEWER)
   }
 
-  return <Viewer
-    cocktails={cocktails}
-    selected={selected}
-    select={select}
-    openEditor={openEditor}
-  />
+  const deleteCocktail = async (cocktailId) => {
+    const result = await cocktailsApi.delete(token, cocktailId)
+    if (result.error) {
+      return console.error('COULD NOT REMOVE COCKTAIL')
+    }
+    setCocktails(cocktails => cocktails.filter(cocktail => cocktail.id !== cocktailId))
+    setScreen(screens.VIEWER)
+  }
+
+  switch (screen) {
+    case screens.LOGIN:
+      return <Login close={closeLogin} />
+    case screens.VIEWER:
+      return <Viewer
+        cocktails={cocktails}
+        openEditor={openEditor}
+        logout={logout} />
+    case screens.EDITOR:
+      return <Editor
+        close={closeEditor}
+        cocktails={cocktails}
+        availableMethods={availableMethods}
+        availableGlasses={availableGlasses}
+        save={saveCocktail}
+        delete={deleteCocktail} />
+    case screens.ERROR:
+      return <View><Text>ERROR</Text></View>
+    default:
+      return <View><Text>LOADING</Text></View>
+  }
 }
-
-const styles = StyleSheet.create({
-
-})
 
 export default App;

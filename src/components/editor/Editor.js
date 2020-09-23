@@ -1,71 +1,74 @@
 import React, { useState, useEffect } from 'react'
 import { StyleSheet, ScrollView, View, Text, TextInput, TouchableWithoutFeedback, FlatList } from 'react-native'
+import Icon from 'react-native-vector-icons/FontAwesome5'
 
-import IngredientInput from './IngredientInput'
-import Dialog from './Dialog'
+import Dialog from '../common/Dialog'
+import Button from '../common/Button'
+import Dropdown from '../common/Dropdown'
 import GlassCard from './GlassCard'
-import EditorButton from './EditorButton'
-
-import {
-    saveNewIngredient,
-    getAvailable,
-    saveCocktail
-} from '../../utils/utils'
-import { useBackButton } from '../../utils/backButtonHandler'
 
 const emptyIngredient = { name: '', amount: '' }
 
 const Editor = (props) => {
-    const [availableIngredients, setAvailableIngredients] = useState([])
-    const [availableGlasses, setAvailableGlasses] = useState([])
-    const [availableMethods, setAvailableMethods] = useState([])
+    const [selected, setSelected] = useState(false)
     const [id, setId] = useState(null)
     const [name, setName] = useState('')
     const [ingredients, setIngredients] = useState([emptyIngredient])
     const [garnish, setGarnish] = useState('')
     const [method, setMethod] = useState('Shaken')
-    const [glass, setGlass] = useState(null)
+    const [glass, setGlass] = useState('No glass selected')
     const [info, setInfo] = useState('')
 
+    const [availableIngredients, setAvailableIngredients] = useState([])
+
+    const [ingredientNameDialogVisible, setIngredientNameDialogVisible] = useState(false)
     const [methodDialogVisible, setMethodDialogVisible] = useState(false)
     const [glassDialogVisible, setGlassDialogVisible] = useState(false)
-    const [exitDialogVisible, setExitDialogVisible] = useState(false)
+    const [confirmationDialog, setConfirmationDialog] = useState(false)
 
-    useEffect(() => {
-        const fetchadditionalInfo = async () => {
-            setAvailableIngredients(await getAvailable('ingredients'))
-            setAvailableGlasses(await getAvailable('glasses'))
-            setAvailableMethods(await getAvailable('methods'))
-        }
-        fetchadditionalInfo()
-        initialize()
-    }, [])
+    const selectCocktail = (selectedId) => {
+        if (selectedId) {
+            const {
+                id,
+                name,
+                ingredients,
+                method,
+                glass
+            } = props.cocktails.find(cocktail => cocktail.id === selectedId)
 
-    const initialize = () => {
-        if (props.cocktail) {
-            const { id, name, ingredients, garnish, method, glass, info } = props.cocktail
             setId(id)
             setName(name)
-            setIngredients(ingredients.concat(emptyIngredient))
-            garnish && setGarnish(garnish)
-            glass && setGlass(glass)
-            method && setMethod(method)
-            info && setInfo(info)
+            setIngredients(ingredients)
+            setMethod(method)
+            setGlass(glass)
         }
+
+        setAvailableIngredients(Array.from(
+            props.cocktails.reduce((acc, cur) => {
+                cur.ingredients.forEach(ingredient => acc.add(ingredient.name))
+                return acc
+            }, new Set())
+        ).sort())
+        setSelected(name || 'New Cocktail')
     }
 
-    useBackButton(() => {
-        setExitDialogVisible(true)
-        return true
-    })
+    const selectMethod = (selectedMethod) => {
+        setMethod(selectedMethod)
+        setMethodDialogVisible(false)
+    }
+
+    const selectGlass = (selectedGlass) => {
+        setGlass(selectedGlass)
+        setGlassDialogVisible(false)
+    }
 
     /*
     *  Ingredient list has always an empty item at the end. 
     */
-    const updateIngredient = (index) => (ingredientPart) => {
+    const setIngredient = (index, field) => (value) => {
         let newIngredients = ingredients.map((ingredient, i) => {
-            if (i == index) {
-                return { ...ingredient, ...ingredientPart }
+            if (i === index) {
+                return { ...ingredient, [field]: value }
             } else {
                 return ingredient
             }
@@ -79,84 +82,80 @@ const Editor = (props) => {
             newIngredients = newIngredients.concat(emptyIngredient)
         }
 
-        // if second to last ingredient is empty, remove the last (empty) ingredient
-        if (index == ingredients.length - 2) {
-            const { name, amount } = newIngredients[index]
-            if (name == '' && amount == '') {
-                newIngredients = newIngredients.slice(0, newIngredients.length - 1)
-            }
-        }
-
         setIngredients(newIngredients)
     }
 
-    const selectMethod = (method) => () => {
-        setMethod(method)
-        setMethodDialogVisible(false)
+    const getIngredientName = (index) => {
+        if (index === false) return ''
+        return ingredients[index].name
     }
 
-    const selectGlass = (glass) => () => {
-        setGlass(glass)
-        setGlassDialogVisible(false)
-    }
+    const save = () => props.save({ id, name, ingredients: ingredients.slice(0, -1), garnish, method, glass, info })
 
-    const save = async () => {
-        if (ingredients.some(ingredient => ingredient.isNew)) {
-            console.error('cant save with new ingredients')
-            return
+    const confirmationDialogs = {
+        'cancel': {
+            message: 'Are you sure you want to cancel?',
+            function: props.close,
+        },
+        'delete': {
+            message: 'Are you sure you want to delete?',
+            function: props.delete.bind(this, id),
+        },
+        false: {
+            message: '',
+            function: () => {}
         }
-
-        const cocktail = {
-            id: id ? id : undefined,
-            name,
-            ingredients: ingredients.slice(0, ingredients.length - 1),
-            garnish,
-            method,
-            glass,
-            info
-        }
-        const error = await saveCocktail(cocktail)
-        if (error) {
-            return console.error('could not save cocktail, error status:', error)
-        }
-
-        props.closeEditor(true)
-    }
-
-    const closeEditor = () => {
-        props.closeEditor(false)
     }
 
     return (
         <ScrollView style={styles.editor}>
+
+            <Dialog visible={!selected} close={props.close}>
+                <Text style={styles.text}>Select cocktail to edit</Text>
+                <TextInput style={[styles.input, styles.cocktailSelect]} placeholder="Search" />
+                <FlatList
+                    data={[{ name: 'New Cocktail' }].concat(props.cocktails)}
+                    renderItem={({ item, index }) =>
+                        <TouchableWithoutFeedback onPress={selectCocktail.bind(this, item.id)}>
+                            <Text style={[styles.text, styles.cocktailSelect]}>{item.name}</Text>
+                        </TouchableWithoutFeedback>}
+                    keyExtractor={(item, index) => 'cocktail_' + index}
+                />
+            </Dialog>
 
             <Text style={styles.header}>Name</Text>
             <TextInput style={[styles.inputArea, styles.input]} value={name} onChangeText={setName} />
 
             <Text style={styles.header}>Ingredients</Text>
             <View style={styles.inputArea}>
-                {ingredients.map((ingredient, i) => <IngredientInput key={i}
-                    style={styles.input}
-                    ingredient={ingredient}
-                    availableIngredients={availableIngredients}
-                    updateIngredient={updateIngredient(i)} />)}
+                {ingredients.map((ingredient, i) => (
+                    <View key={'ingredient_' + i} style={styles.ingredientInput}>
+                        <Text style={styles.ingredientDot}>{`\u2022`}</Text>
+                        <TextInput style={[styles.input, styles.ingredientAmountInput]} value={ingredient.amount} onChangeText={setIngredient(i, 'amount')} />
+                        <View style={[styles.ingredientNameInputArea]}>
+                            <Text style={[styles.ingredientNameInputText, styles.text]} onPress={setIngredientNameDialogVisible.bind(this, i)}>{ingredient.name}</Text>
+                            <Icon name="caret-down" size={24} />
+                        </View>
+                    </View>
+                ))}
             </View>
 
-            <Text style={styles.header}>Garnish</Text>
-            <TextInput style={[styles.inputArea, styles.input]} value={garnish} onChangeText={setGarnish} />
-
-            <Text style={styles.header}>Method</Text>
-            <TouchableWithoutFeedback onPress={setMethodDialogVisible.bind(this, true)}>
-                <Text style={[styles.inputArea, styles.input]}>{method}</Text>
-            </TouchableWithoutFeedback>
-
-            <Dialog visible={methodDialogVisible} close={setMethodDialogVisible.bind(this, false)}>
+            <Dialog visible={ingredientNameDialogVisible !== false} close={setIngredientNameDialogVisible.bind(this, false)}>
+                <Text style={styles.text}>Ingredient name</Text>
+                <TextInput
+                    style={styles.input}
+                    value={getIngredientName(ingredientNameDialogVisible)}
+                    onChangeText={setIngredient(ingredientNameDialogVisible, 'name')}
+                    onSubmitEditing={setIngredientNameDialogVisible.bind(this, false)} />
                 <FlatList
-                    data={availableMethods}
-                    renderItem={({ item, index }) => {
+                    data={availableIngredients}
+                    renderItem={({ item }) => {
                         return (
-                            <TouchableWithoutFeedback onPress={selectMethod(item)}>
-                                <Text style={[styles.input, styles.modalInput]}>{item}</Text>
+                            <TouchableWithoutFeedback onPress={() => {
+                                setIngredient(ingredientNameDialogVisible, 'name')(item)
+                                setIngredientNameDialogVisible(false)
+                            }}>
+                                <Text style={[styles.text]}>{item}</Text>
                             </TouchableWithoutFeedback>
                         )
                     }}
@@ -164,14 +163,25 @@ const Editor = (props) => {
                 />
             </Dialog>
 
+            <Text style={styles.header}>Garnish</Text>
+            <TextInput style={[styles.inputArea, styles.input]} value={garnish} onChangeText={setGarnish} />
+
+            <Text style={styles.header}>Method</Text>
+            <Dropdown
+                dropdownStyle={[styles.input, styles.inputArea]}
+                textStyle={styles.text}
+                options={props.availableMethods.map(method => ({ label: method, value: method }))}
+                selected={method}
+                onSelect={selectMethod} />
+
             <Text style={styles.header}>Glassware</Text>
             <GlassCard style={[styles.inputArea, styles.input]} select={setGlassDialogVisible.bind(this, true)} glass={glass} />
 
             <Dialog visible={glassDialogVisible} close={setGlassDialogVisible.bind(this, false)}>
                 <FlatList
-                    data={availableGlasses}
-                    renderItem={({ item, index }) => <GlassCard select={selectGlass(item)} glass={item} />}
-                    keyExtractor={(item, index) => index + item}
+                    data={props.availableGlasses}
+                    renderItem={({ item, index }) => <GlassCard select={selectGlass.bind(this, item)} glass={item} />}
+                    keyExtractor={(item, index) => 'glass_' + index}
                 />
             </Dialog>
 
@@ -185,22 +195,18 @@ const Editor = (props) => {
             />
 
             <View style={styles.buttons}>
-                <EditorButton title="Save" onPress={save} />
-                <EditorButton title="Cancel" onPress={closeEditor} />
+                <Button title="Save" onPress={save} />
+                <Button title="Cancel" onPress={setConfirmationDialog.bind(this, 'cancel')} />
+                { id && <Button title="Delete" onPress={setConfirmationDialog.bind(this, 'delete')} /> }
             </View>
 
-
-            <Dialog visible={exitDialogVisible} close={setExitDialogVisible.bind(this, false)}>
+            <Dialog visible={!!confirmationDialog} close={setConfirmationDialog.bind(this, false)}>
                 <View>
-                    <Text style={styles.header}>Closing Editor</Text>
-                    <Text style={styles.text}>All your changes will be lost. Are you sure?</Text>
-                    <View style={styles.buttons}>
-                        <EditorButton title="Yes" onPress={closeEditor} />
-                        <EditorButton title="No" onPress={setExitDialogVisible.bind(this, false)} />
-                    </View>
+                    <Text style={styles.text}>{confirmationDialogs[confirmationDialog].message}</Text>
+                    <Button title="Yes" onPress={confirmationDialogs[confirmationDialog].function} />
+                    <Button title="No" onPress={setConfirmationDialog.bind(this, false)} />
                 </View>
             </Dialog>
-
 
         </ScrollView>
     )
@@ -237,6 +243,36 @@ const styles = StyleSheet.create({
         padding: 3,
         paddingLeft: 10,
     },
+    ingredientInput: {
+        flexDirection: 'row',
+        marginBottom: 5
+    },
+
+    ingredientDot: {
+        fontSize: 28
+    },
+    ingredientAmountInput: {
+        marginLeft: 5,
+        flex: 2
+    },
+
+    ingredientNameInputArea: {
+        flexDirection: 'row',
+        flex: 10,
+        borderWidth: 1,
+        borderRadius: 5,
+        padding: 3,
+        paddingLeft: 10,
+        paddingRight: 10,
+        marginLeft: 5
+    },
+
+    ingredientNameInputText: {
+        marginLeft: 5,
+        flex: 10,
+    },
+
+
     modalInput: {
         marginLeft: 0,
         marginTop: 5,
@@ -248,4 +284,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around'
     },
+    dropdown: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        paddingLeft: 5,
+        paddingRight: 5
+    },
+    cocktailSelect: {
+        marginTop: 3,
+        marginBottom: 3
+    }
 })

@@ -2,6 +2,8 @@ import React from 'react'
 import { StyleSheet, View, Modal, TouchableWithoutFeedback, } from 'react-native'
 
 const Dialog = (props) => {
+    if (!props.visible) return null
+
     return (
         <Modal
             animationType="slide"
