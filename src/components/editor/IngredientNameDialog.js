@@ -18,7 +18,7 @@ const IngredientNameDialog = (props) => {
                 onChangeText={props.setIngredient(props.ingredientIndex, 'name')}
                 onSubmitEditing={props.close} />
             <FlatList
-                data={props.ingredients}
+                data={props.availableIngredients}
                 renderItem={({ item }) => {
                     return (
                         <TouchableWithoutFeedback onPress={selectIngredient.bind(this, item)}>

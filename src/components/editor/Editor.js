@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { StyleSheet, ScrollView, View, Text, TextInput, TouchableWithoutFeedback, FlatList } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 
@@ -11,8 +11,13 @@ import SelectMethodDialog from './SelectMethodDialog'
 import IngredientNameDialog from './IngredientNameDialog'
 import SelectGlassDialog from './SelectGlassDialog'
 import ConfirmationDialog from './ConfirmationDialog'
+import MandatoryAlert from './MandatoryAlert'
 
 const emptyIngredient = { name: '', amount: '' }
+const alerts = {
+    NO_NAME: 'This cocktail needs a name!',
+    NO_INGREDIENTS: 'This cocktail needs some ingredients!'
+}
 
 const Editor = (props) => {
     const [selected, setSelected] = useState(false)
@@ -32,6 +37,12 @@ const Editor = (props) => {
     const [glassDialogVisible, setGlassDialogVisible] = useState(false)
     const [confirmationDialogVisible, setConfirmationDialogVisible] = useState(false)
     const [confirmationDialogType, setConfirmationDialogType] = useState('cancel')
+    const [alert, setAlert] = useState(false)
+
+    const nameInput = useRef(null)
+    const ingredientInput = useRef(null)
+
+    // TODO: Name and ingredients are required, all else optional
 
     const selectCocktail = (selectedId) => {
         if (selectedId) {
@@ -45,7 +56,7 @@ const Editor = (props) => {
 
             setId(id)
             setName(name)
-            setIngredients(ingredients)
+            setIngredients(ingredients.length > 0  ? ingredients : [emptyIngredient])
             setMethod(method)
             setGlass(glass)
         }
@@ -102,7 +113,22 @@ const Editor = (props) => {
         setConfirmationDialogType(type)
     }
 
-    const save = () => props.save({ id, name, ingredients: ingredients.slice(0, -1), garnish, method, glass, info })
+    const save = () => {
+        if (!name) {
+            setAlert(alerts.NO_NAME)
+            setTimeout(() => setAlert(false), 5000)
+            nameInput.current.focus()
+            return
+        }
+        if (ingredients.length === 1) { // only the empty ingredient
+            setAlert(alerts.NO_INGREDIENTS)
+            setTimeout(() => setAlert(false), 5000)
+            ingredientInput.current.focus()
+            return
+        }
+        console.log('saving', { id, name, ingredients: ingredients.slice(0, -1), garnish, method, glass, info })
+        props.save({ id, name, ingredients: ingredients.slice(0, -1), garnish, method, glass, info })
+    }
 
     const confirmationDialogs = {
         'cancel': {
@@ -153,14 +179,24 @@ const Editor = (props) => {
             
 
             <Text style={styles.header}>Name</Text>
-            <TextInput style={[styles.inputArea, styles.input]} value={name} onChangeText={setName} />
+            <TextInput 
+                ref={nameInput}
+                style={[styles.inputArea, styles.input]} 
+                value={name} 
+                onChangeText={setName} />
+            <MandatoryAlert style={styles.inputArea} type={alerts.NO_NAME} value={alert} />
+
 
             <Text style={styles.header}>Ingredients</Text>
             <View style={styles.inputArea}>
                 {ingredients.map((ingredient, i) => (
                     <View key={'ingredient_' + i} style={styles.ingredientInput}>
                         <Text style={styles.ingredientDot}>{`\u2022`}</Text>
-                        <TextInput style={[styles.input, styles.ingredientAmountInput]} value={ingredient.amount} onChangeText={setIngredient(i, 'amount')} />
+                        <TextInput 
+                            ref={i === 0 ? ingredientInput : null}
+                            style={[styles.input, styles.ingredientAmountInput]} 
+                            value={ingredient.amount} 
+                            onChangeText={setIngredient(i, 'amount')} />
                         <View style={[styles.ingredientNameInputArea]}>
                             <Text style={[styles.ingredientNameInputText, styles.text]} onPress={openIngredientNameDialog.bind(this, i)}>{ingredient.name}</Text>
                             <Icon name="caret-down" size={24} />
@@ -168,6 +204,7 @@ const Editor = (props) => {
                     </View>
                 ))}
             </View>
+            <MandatoryAlert style={styles.inputArea} type={alerts.NO_INGREDIENTS} value={alert} />
 
             <Text style={styles.header}>Garnish</Text>
             <TextInput style={[styles.inputArea, styles.input]} value={garnish} onChangeText={setGarnish} />
