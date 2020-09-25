@@ -31,18 +31,13 @@ const Editor = (props) => {
 
     const [availableIngredients, setAvailableIngredients] = useState([])
 
-    const [ingredientNameDialogVisible, setIngredientNameDialogVisible] = useState(false)
+    const [dialog, setDialog] = useState(false)
     const [editedIngredientIndex, setEditedIngredientIndex] = useState(0)
-    const [methodDialogVisible, setMethodDialogVisible] = useState(false)
-    const [glassDialogVisible, setGlassDialogVisible] = useState(false)
-    const [confirmationDialogVisible, setConfirmationDialogVisible] = useState(false)
     const [confirmationDialogType, setConfirmationDialogType] = useState('cancel')
     const [alert, setAlert] = useState(false)
 
     const nameInput = useRef(null)
     const ingredientInput = useRef(null)
-
-    // TODO: Name and ingredients are required, all else optional
 
     const selectCocktail = (selectedId) => {
         if (selectedId) {
@@ -56,7 +51,7 @@ const Editor = (props) => {
 
             setId(id)
             setName(name)
-            setIngredients(ingredients.length > 0  ? ingredients : [emptyIngredient])
+            setIngredients(ingredients.length > 0 ? ingredients : [emptyIngredient])
             setMethod(method)
             setGlass(glass)
         }
@@ -72,12 +67,12 @@ const Editor = (props) => {
 
     const selectMethod = (selectedMethod) => {
         setMethod(selectedMethod)
-        setMethodDialogVisible(false)
+        setDialog(false)
     }
 
     const selectGlass = (selectedGlass) => {
         setGlass(selectedGlass)
-        setGlassDialogVisible(false)
+        setDialog(false)
     }
 
     /*
@@ -104,13 +99,13 @@ const Editor = (props) => {
     }
 
     const openIngredientNameDialog = (index) => {
-        setIngredientNameDialogVisible(true)
         setEditedIngredientIndex(index)
+        setDialog('ingredient')
     }
 
     const openConfirmationDialog = (type) => {
-        setConfirmationDialogVisible(true)
         setConfirmationDialogType(type)
+        setDialog('confirmation')
     }
 
     const save = () => {
@@ -146,43 +141,43 @@ const Editor = (props) => {
 
             <SelectCocktailDialog
                 visible={!selected}
-                close={setSelected.bind(this, false)}
+                close={props.close}
                 cocktails={props.cocktails}
                 selectCocktail={selectCocktail} />
 
-            <SelectMethodDialog
-                visible={methodDialogVisible}
-                close={setMethodDialogVisible.bind(this, false)}
-                methods={props.availableMethods}
-                selectMethod={selectMethod} />
-
             <IngredientNameDialog
-                visible={ingredientNameDialogVisible}
-                close={setIngredientNameDialogVisible.bind(this, false)}
+                visible={dialog === 'ingredient'}
+                close={setDialog.bind(this, false)}
                 availableIngredients={availableIngredients}
                 ingredientIndex={editedIngredientIndex}
                 value={editedIngredientIndex === false ? '' : ingredients[editedIngredientIndex].name}
                 setIngredient={setIngredient} />
 
+            <SelectMethodDialog
+                visible={dialog === 'method'}
+                close={setDialog.bind(this, false)}
+                methods={props.availableMethods}
+                selectMethod={selectMethod} />
+
             <SelectGlassDialog
-                visible={glassDialogVisible}
-                close={setGlassDialogVisible.bind(this, false)}
+                visible={dialog === 'glass'}
+                close={setDialog.bind(this, false)}
                 availableGlasses={props.availableGlasses}
                 selectGlass={selectGlass} />
 
             <ConfirmationDialog
-                visible={confirmationDialogVisible}
-                close={setConfirmationDialogVisible.bind(this, false)}
+                visible={dialog === 'confirmation'}
+                close={setDialog.bind(this, false)}
                 message={confirmationDialogs[confirmationDialogType].message}
                 action={confirmationDialogs[confirmationDialogType].action} />
 
-            
+
 
             <Text style={styles.header}>Name</Text>
-            <TextInput 
+            <TextInput
                 ref={nameInput}
-                style={[styles.inputArea, styles.input]} 
-                value={name} 
+                style={[styles.inputArea, styles.input]}
+                value={name}
                 onChangeText={setName} />
             <MandatoryAlert style={styles.inputArea} type={alerts.NO_NAME} value={alert} />
 
@@ -192,10 +187,10 @@ const Editor = (props) => {
                 {ingredients.map((ingredient, i) => (
                     <View key={'ingredient_' + i} style={styles.ingredientInput}>
                         <Text style={styles.ingredientDot}>{`\u2022`}</Text>
-                        <TextInput 
+                        <TextInput
                             ref={i === 0 ? ingredientInput : null}
-                            style={[styles.input, styles.ingredientAmountInput]} 
-                            value={ingredient.amount} 
+                            style={[styles.input, styles.ingredientAmountInput]}
+                            value={ingredient.amount}
                             onChangeText={setIngredient(i, 'amount')} />
                         <View style={[styles.ingredientNameInputArea]}>
                             <Text style={[styles.ingredientNameInputText, styles.text]} onPress={openIngredientNameDialog.bind(this, i)}>{ingredient.name}</Text>
@@ -210,10 +205,10 @@ const Editor = (props) => {
             <TextInput style={[styles.inputArea, styles.input]} value={garnish} onChangeText={setGarnish} />
 
             <Text style={styles.header}>Method</Text>
-            <Dropdown style={[styles.inputArea, styles.input]} value={method} onPress={setMethodDialogVisible.bind(this, true)} />
+            <Dropdown style={[styles.inputArea, styles.input]} value={method} onPress={setDialog.bind(this, 'method')} />
 
             <Text style={styles.header}>Glassware</Text>
-            <GlassCard style={[styles.inputArea, styles.input]} select={setGlassDialogVisible.bind(this, true)} glass={glass} />
+            <GlassCard style={[styles.inputArea, styles.input]} select={setDialog.bind(this, 'glass')} glass={glass} />
 
             <Text style={styles.header}>Information</Text>
             <TextInput
