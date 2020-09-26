@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { StyleSheet, ScrollView, View, Text, TextInput, TouchableWithoutFeedback, FlatList } from 'react-native'
-import Icon from 'react-native-vector-icons/FontAwesome5'
+import React, { useState, useRef } from 'react'
+import { StyleSheet, ScrollView, View } from 'react-native'
+import Icon from 'react-native-vector-icons/Entypo'
 
-import Dialog from '../common/Dialog'
-import Button from '../common/Button'
-import Dropdown from '../common/Dropdown'
 import GlassCard from './GlassCard'
 import SelectCocktailDialog from './SelectCocktailDialog'
 import SelectMethodDialog from './SelectMethodDialog'
@@ -12,6 +9,7 @@ import IngredientNameDialog from './IngredientNameDialog'
 import SelectGlassDialog from './SelectGlassDialog'
 import ConfirmationDialog from './ConfirmationDialog'
 import MandatoryAlert from './MandatoryAlert'
+import { Header,  Button, TextInput, Dropdown } from '../common/styledComponents'
 
 const emptyIngredient = { name: '', amount: '' }
 const alerts = {
@@ -173,48 +171,43 @@ const Editor = (props) => {
 
 
 
-            <Text style={styles.header}>Name</Text>
-            <TextInput
-                ref={nameInput}
-                style={[styles.inputArea, styles.input]}
-                value={name}
-                onChangeText={setName} />
-            <MandatoryAlert style={styles.inputArea} type={alerts.NO_NAME} value={alert} />
+            <Header>Name</Header>
+            <TextInput ref={nameInput} style={styles.indented} value={name} onChangeText={setName} />
+            <MandatoryAlert style={styles.indented} type={alerts.NO_NAME} value={alert} />
 
-
-            <Text style={styles.header}>Ingredients</Text>
-            <View style={styles.inputArea}>
+            <Header>Ingredients</Header>
+            <View style={styles.indented}>
                 {ingredients.map((ingredient, i) => (
                     <View key={'ingredient_' + i} style={styles.ingredientInput}>
-                        <Text style={styles.ingredientDot}>{`\u2022`}</Text>
+                        <Icon name="dot-single" size={32}/>
                         <TextInput
                             ref={i === 0 ? ingredientInput : null}
-                            style={[styles.input, styles.ingredientAmountInput]}
+                            style={styles.ingredientAmountInput}
                             value={ingredient.amount}
                             onChangeText={setIngredient(i, 'amount')} />
-                        <View style={[styles.ingredientNameInputArea]}>
-                            <Text style={[styles.ingredientNameInputText, styles.text]} onPress={openIngredientNameDialog.bind(this, i)}>{ingredient.name}</Text>
-                            <Icon name="caret-down" size={24} />
-                        </View>
+                        <Dropdown
+                            style={styles.ingredientNameInput}
+                            value={ingredient.name}
+                            onPress={openIngredientNameDialog.bind(this, i)} />
                     </View>
                 ))}
             </View>
-            <MandatoryAlert style={styles.inputArea} type={alerts.NO_INGREDIENTS} value={alert} />
+            <MandatoryAlert style={styles.indented} type={alerts.NO_INGREDIENTS} value={alert} />
 
-            <Text style={styles.header}>Garnish</Text>
-            <TextInput style={[styles.inputArea, styles.input]} value={garnish} onChangeText={setGarnish} />
+            <Header>Garnish</Header>
+            <TextInput style={styles.indented} value={garnish} onChangeText={setGarnish} />
 
-            <Text style={styles.header}>Method</Text>
-            <Dropdown style={[styles.inputArea, styles.input]} value={method} onPress={setDialog.bind(this, 'method')} />
+            <Header>Method</Header>
+            <Dropdown style={styles.indented} value={method} onPress={setDialog.bind(this, 'method')} />
 
-            <Text style={styles.header}>Glassware</Text>
-            <GlassCard style={[styles.inputArea, styles.input]} select={setDialog.bind(this, 'glass')} glass={glass} />
+            <Header>Glassware</Header>
+            <GlassCard style={styles.indented} select={setDialog.bind(this, 'glass')} glass={glass} />
 
-            <Text style={styles.header}>Information</Text>
+            <Header>Information</Header>
             <TextInput
                 value={info}
                 multiline={true}
-                style={[styles.input, styles.inputArea, { textAlignVertical: 'top' }]}
+                style={[styles.indented, { textAlignVertical: 'top' }]}
                 numberOfLines={4}
                 onChangeText={setInfo}
             />
@@ -233,80 +226,32 @@ export default Editor
 
 const styles = StyleSheet.create({
     editor: {
-        marginTop: 30,
         marginLeft: 10,
-        marginRight: 0,
         marginBottom: 30,
         paddingRight: 15
     },
-    text: {
-        fontFamily: 'Alegreya-Medium',
-        fontSize: 20,
-    },
-    header: {
-        fontFamily: 'CherryCreamSoda-Regular',
-        fontSize: 24,
-        marginTop: 10,
-        marginBottom: 5,
-    },
-    inputArea: {
+    indented: {
         marginLeft: 30
     },
-    input: {
-        fontFamily: 'Alegreya-Medium',
-        fontSize: 20,
-        borderWidth: 1,
-        borderRadius: 5,
-        padding: 3,
-        paddingLeft: 10,
-    },
+
     ingredientInput: {
         flexDirection: 'row',
-        marginBottom: 5
-    },
-
-    ingredientDot: {
-        fontSize: 28
+        alignItems: 'center',
+        marginBottom: 6,
     },
     ingredientAmountInput: {
+        width: 50,
+        height: 38,
+    },
+    ingredientNameInput: {
         marginLeft: 5,
-        flex: 2
+        flexGrow: 1,
+        height: 38
     },
 
-    ingredientNameInputArea: {
-        flexDirection: 'row',
-        flex: 10,
-        borderWidth: 1,
-        borderRadius: 5,
-        padding: 3,
-        paddingLeft: 10,
-        paddingRight: 10,
-        marginLeft: 5
-    },
-
-    ingredientNameInputText: {
-        marginLeft: 5,
-        flex: 10,
-    },
-
-
-    modalInput: {
-        marginLeft: 0,
-        marginTop: 5,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
     buttons: {
         marginTop: 20,
         flexDirection: 'row',
         justifyContent: 'space-around'
-    },
-    dropdown: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        paddingLeft: 5,
-        paddingRight: 5
     },
 })

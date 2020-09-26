@@ -1,15 +1,14 @@
 import React from 'react'
-import { StyleSheet, View, Image, Text, TouchableWithoutFeedback } from 'react-native'
+import { StyleSheet, View, Image, TouchableWithoutFeedback } from 'react-native'
 import images from '../../img/images'
-
-
+import { Text } from '../common/styledComponents'
 
 const GlassCard = (props) => {
     return (
         <TouchableWithoutFeedback onPress={props.select}>
             <View style={[props.style, styles.glassCard]}>
                 <Image style={styles.image} source={images(props.glass)} />
-                <Text style={styles.text}>{props.glass}</Text>
+                <Text>{props.glass}</Text>
             </View>
         </TouchableWithoutFeedback>
     )
@@ -18,7 +17,6 @@ const GlassCard = (props) => {
 export default GlassCard
 
 const styles = StyleSheet.create({
-    
     glassCard: {
         borderWidth: 0,
         flexDirection: 'row',
@@ -30,8 +28,4 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
         marginRight: 10,
     },
-    text: {
-        fontFamily: 'Alegreya-Medium'   ,
-        fontSize: 20,
-    }
 })

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, Text, TextInput, FlatList } from 'react-native'
+import { StyleSheet } from 'react-native'
 
-import Dialog from '../common/Dialog'
-import Button from '../common/Button'
+import { Button, Dialog } from '../common/styledComponents'
 
 const Menu = (props) => {
     return (

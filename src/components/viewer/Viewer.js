@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, Text, TextInput, FlatList } from 'react-native'
+import { StyleSheet, View, FlatList } from 'react-native'
 import Icon from 'react-native-vector-icons/Entypo'
 import Cocktail from './Cocktail'
+import { Text, TextInput } from '../common/styledComponents'
 import Menu from './Menu'
 
 const Viewer = (props) => {
@@ -39,9 +40,7 @@ const Viewer = (props) => {
   return (
     <View style={styles.viewer}>
       <View style={styles.controls}>
-        <View style={styles.textInput}>
-          <TextInput type="text" value={searchInput} onChange={event => setSearchInput(event.nativeEvent.text)} />
-        </View>
+          <TextInput style={styles.search} value={searchInput} onChange={event => setSearchInput(event.nativeEvent.text)} />
         <Icon name="menu" size={35} onPress={setMenuOpen.bind(this, true)} />
       </View>
 
@@ -63,21 +62,15 @@ const styles = StyleSheet.create({
   controls: {
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     marginBottom: 10
   },
-  textInput: {
+  search: {
     width: '80%',
-    borderWidth: 1,
-    borderRadius: 10,
-    marginRight: 15
+    marginRight: 10
   },
   list: {
     width: '100%',
   },
-  text: {
-    fontFamily: 'Alegreya-Medium',
-    fontSize: 22
-  }
 })

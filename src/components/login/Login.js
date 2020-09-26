@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
-import { StyleSheet, View, Text, TextInput } from 'react-native'
+import { StyleSheet, View, Text } from 'react-native'
 import { login } from '../../utils/apiUtils'
 
-import Dialog from '../common/Dialog'
-import Button from '../common/Button'
+import { Button, Dialog, TextInput } from '../common/styledComponents'
 
 const Login = (props) => {
     const [usernameValue, setUsernameValue] = useState('')
@@ -21,7 +20,6 @@ const Login = (props) => {
 
         setBusy(true)
         const response = await login(usernameValue, passwordValue)
-        console.log('got response', response)
         setBusy(false)
         if (response.error) {
             setError('Could not log in: ' + JSON.stringify(response.msg), 20000)
@@ -59,9 +57,9 @@ const Login = (props) => {
         <Dialog>
             <Text style={styles.heading}>Please log in</Text>
             <Text style={styles.text}>Username:</Text>
-            <TextInput style={styles.input} value={usernameValue} onChangeText={setUsernameValue} />
+            <TextInput value={usernameValue} onChangeText={setUsernameValue} />
             <Text style={styles.text}>Password:</Text>
-            <TextInput style={styles.input} value={passwordValue} onChangeText={setPasswordValue} />
+            <TextInput value={passwordValue} onChangeText={setPasswordValue} />
 
             <Busy />
             <Error />
@@ -76,11 +74,6 @@ const styles = StyleSheet.create({
         fontFamily: 'CherryCreamSoda-Regular',
         fontSize: 24,
         marginBottom: 10
-    },
-    input: {
-        borderWidth: 1,
-        borderRadius: 5,
-        padding: 2,
     },
     suggestions: {
         borderWidth: 1,

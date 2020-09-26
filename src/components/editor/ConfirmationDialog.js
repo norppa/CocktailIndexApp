@@ -1,36 +1,29 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-import Dialog from '../common/Dialog'
-import Button from '../common/Button'
+import { StyleSheet, View } from 'react-native'
+import { Text, Button, Dialog } from '../common/styledComponents'
 
 const SelectCocktailDialog = (props) => {
     return (
         <Dialog visible={props.visible} close={props.close}>
             <View>
-                <Text style={styles.text}>{props.message}</Text>
-                <Button title="Yes" onPress={props.action} />
-                <Button title="No" onPress={props.close} />
+                <Text>{props.message}</Text>
+                <View style={styles.buttonRow}>
+                    <Button style={styles.button} title="Yes" onPress={props.action} />
+                    <Button style={styles.button}  title="No" onPress={props.close} />
+                </View>
             </View>
         </Dialog>
     )
 }
 
 const styles = StyleSheet.create({
-    text: {
-        fontFamily: 'Alegreya-Medium',
-        fontSize: 20,
+    buttonRow: {
+        marginTop: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-around'
     },
-    input: {
-        fontFamily: 'Alegreya-Medium',
-        fontSize: 20,
-        borderWidth: 1,
-        borderRadius: 5,
-        padding: 3,
-        paddingLeft: 10,
-    },
-    cocktailSelect: {
-        marginTop: 3,
-        marginBottom: 3
+    button: {
+        width: 100
     }
 
 })

@@ -1,17 +1,18 @@
 import React from 'react'
-import { StyleSheet, Text, TextInput, TouchableWithoutFeedback, FlatList } from 'react-native'
-import Dialog from '../common/Dialog'
+import { StyleSheet, TouchableWithoutFeedback, FlatList } from 'react-native'
+
+import { Header, Text, TextInput, Dialog } from '../common/styledComponents'
 
 const SelectCocktailDialog = (props) => {
     return (
         <Dialog visible={props.visible} close={props.close}>
-            <Text style={styles.text}>Select cocktail to edit</Text>
-            <TextInput style={[styles.input, styles.cocktailSelect]} placeholder="Search" />
+            <Header>Select cocktail</Header>
+            <TextInput placeholder="Search" />
             <FlatList
                 data={[{ name: 'New Cocktail' }].concat(props.cocktails)}
                 renderItem={({ item, index }) =>
                     <TouchableWithoutFeedback onPress={props.selectCocktail.bind(this, item.id)}>
-                        <Text style={[styles.text, styles.cocktailSelect]}>{item.name}</Text>
+                        <Text style={styles.listItem}>{item.name}</Text>
                     </TouchableWithoutFeedback>}
                 keyExtractor={(item, index) => 'cocktail_' + index}
             />
@@ -20,19 +21,7 @@ const SelectCocktailDialog = (props) => {
 }
 
 const styles = StyleSheet.create({
-    text: {
-        fontFamily: 'Alegreya-Medium',
-        fontSize: 20,
-    },
-    input: {
-        fontFamily: 'Alegreya-Medium',
-        fontSize: 20,
-        borderWidth: 1,
-        borderRadius: 5,
-        padding: 3,
-        paddingLeft: 10,
-    },
-    cocktailSelect: {
+    listItem: {
         marginTop: 3,
         marginBottom: 3
     }

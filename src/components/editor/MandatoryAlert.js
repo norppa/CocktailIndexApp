@@ -1,5 +1,6 @@
 import React from 'react'
-import { StyleSheet, Text, TextInput, TouchableWithoutFeedback, FlatList, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+import { Text } from '../common/styledComponents'
 
 const MandatoryAlert = (props) => {
     if (props.type !== props.value) return null
@@ -17,8 +18,6 @@ const styles = StyleSheet.create({
         marginBottom: 3,
     },
     text: {
-        fontFamily: 'Alegreya-Medium',
-        fontSize: 20,
         color: 'red'
     },
 })
