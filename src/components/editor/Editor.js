@@ -49,7 +49,7 @@ const Editor = (props) => {
 
             setId(id)
             setName(name)
-            setIngredients(ingredients.length > 0 ? ingredients : [emptyIngredient])
+            setIngredients(ingredients.concat(emptyIngredient))
             setMethod(method)
             setGlass(glass)
         }
