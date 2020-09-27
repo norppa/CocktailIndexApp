@@ -1,5 +1,5 @@
 
-const baseUrl = 'http://10.0.2.2:3000/cocktailindex'
+const baseUrl = 'https://jtthaavi.kapsi.fi/subrosa/cocktailindex'
 
 const login = async (username, password) => {
     console.log('apiUtils login', username, password)
@@ -40,6 +40,7 @@ const getCocktails = async (token) => {
             'Accept': 'application/json'
         }
     }
+    console.log('GET', url, request)
 
     try {
         const result = await fetch(url, request)

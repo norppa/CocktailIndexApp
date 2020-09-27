@@ -34,12 +34,16 @@ const App = () => {
   }, [])
 
   const initialize = async (token) => {
+    console.log('initialize')
+    console.log('DEV', __DEV__)
     if (!token) {
       return setScreen(screens.LOGIN)
 
     }
 
     const cocktails = await cocktailsApi.get(token)
+    console.log('cocktails', cocktails.length)
+    console.log
     if (cocktails.error) {
       return console.log('closeLogin error', cocktails.error)
     }

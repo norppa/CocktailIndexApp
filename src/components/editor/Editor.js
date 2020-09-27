@@ -240,13 +240,11 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     ingredientAmountInput: {
-        width: 50,
-        height: 38,
+        width: 60,
     },
     ingredientNameInput: {
         marginLeft: 5,
         flexGrow: 1,
-        height: 38
     },
 
     buttons: {
