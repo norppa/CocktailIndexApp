@@ -12,14 +12,14 @@ const Viewer = (props) => {
 
   useEffect(() => {
     setCocktailList(props.cocktails.filter(cocktail => cocktail.name.toLowerCase().includes(searchInput.toLowerCase())))
-  }, [searchInput])
+  }, [searchInput, props.cocktails])
 
   const CocktailList = () => {
     if (cocktailList.length > 0) {
       return <FlatList
         style={styles.list}
         data={cocktailList}
-        renderItem={({ item }) => <Cocktail cocktail={item} openEditor={props.openEditor} />}
+        renderItem={({ item }) => <Cocktail cocktail={item} actions={props.actions} />}
         keyExtractor={(item, index) => index + item.name}
         ListFooterComponent={<View style={styles.spacer} />} />
     } else {
@@ -37,7 +37,8 @@ const Viewer = (props) => {
               <Icon name="menu" size={35} />
             </MenuTrigger>
             <MenuOptions style={styles.menuOptions} customStyles={menuOptionCustomStyles}>
-              <MenuOption onSelect={props.logout} text='Logout' />
+              <MenuOption onSelect={props.actions.logout} text='Logout' />
+              {/* <MenuOption onSelect={props.actions.debug} text='Debug' /> */}
             </MenuOptions>
           </Menu>
         </View>

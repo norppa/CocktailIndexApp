@@ -18,13 +18,13 @@ const Cocktail = (props) => {
     const menuSelect = (value) => {
         switch (value) {
             case 'edit':
-                props.openEditor(props.cocktail.id)
+                props.actions.openEditor(props.cocktail.id)
                 break
             case 'new':
-                props.openEditor('')
+                props.actions.openEditor('')
                 break
             case 'delete':
-                console.log('delete not implemented')
+                props.actions.deleteCocktail(props.cocktail.id)
                 break
             default: { }
         }

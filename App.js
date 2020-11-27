@@ -114,14 +114,17 @@ const App = () => {
     setScreen(screens.VIEWER)
   }
 
+  const debug = () => {
+    console.log('cocktails', cocktails.map(x => x.id + ":" + x.name))
+  }
+
   switch (screen) {
     case screens.LOGIN:
       return <Login close={closeLogin} />
     case screens.VIEWER:
       return <Viewer
         cocktails={cocktails}
-        openEditor={openEditor}
-        logout={logout} />
+        actions={{openEditor, deleteCocktail, logout, debug}} />
     case screens.EDITOR:
       return <Editor
         cocktails={cocktails}
