@@ -73,7 +73,6 @@ const App = () => {
   }
 
   const openEditor = async (cocktailId) => {
-    console.log('openEditor', cocktailId)
     if (!availableMethods || !availableGlasses) {
       const availableMethods = await getAvailable('methods', token)
       const availableGlasses = await getAvailable('glasses', token)
@@ -90,7 +89,7 @@ const App = () => {
 
   const saveCocktail = async (cocktail) => {
     const storedCocktail = await cocktailsApi.save(token, cocktail)
-    console.log('saveCocktail, storedCocktail', storedCocktail)
+    // console.log('saveCocktail, storedCocktail', storedCocktail)
     if (cocktail.id) {
       setCocktails(cocktails => cocktails.map(c => {
         if (c.id == cocktail.id) {
@@ -114,17 +113,13 @@ const App = () => {
     setScreen(screens.VIEWER)
   }
 
-  const debug = () => {
-    console.log('cocktails', cocktails.map(x => x.id + ":" + x.name))
-  }
-
   switch (screen) {
     case screens.LOGIN:
       return <Login close={closeLogin} />
     case screens.VIEWER:
       return <Viewer
         cocktails={cocktails}
-        actions={{openEditor, deleteCocktail, logout, debug}} />
+        actions={{openEditor, deleteCocktail, logout}} />
     case screens.EDITOR:
       return <Editor
         cocktails={cocktails}

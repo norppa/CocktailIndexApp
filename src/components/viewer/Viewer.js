@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
       borderRadius: 10,
   },
   spacer: {
-    marginBottom: 120
+    marginBottom: 200
   }
 })

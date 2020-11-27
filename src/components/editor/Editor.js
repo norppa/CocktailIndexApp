@@ -3,7 +3,6 @@ import { StyleSheet, ScrollView, View } from 'react-native'
 import Icon from 'react-native-vector-icons/Entypo'
 
 import GlassCard from './GlassCard'
-import SelectCocktailDialog from './SelectCocktailDialog'
 import SelectMethodDialog from './SelectMethodDialog'
 import IngredientNameDialog from './IngredientNameDialog'
 import SelectGlassDialog from './SelectGlassDialog'
@@ -119,7 +118,6 @@ const Editor = (props) => {
             ingredientInput.current.focus()
             return
         }
-        console.log('saving', { id, name, ingredients: ingredients.slice(0, -1), garnish, method, glass, info })
         props.save({ id, name, ingredients: ingredients.slice(0, -1), garnish, method, glass, info })
     }
 
@@ -240,7 +238,6 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         flexGrow: 1,
     },
-
     buttons: {
         marginTop: 20,
         flexDirection: 'row',
