@@ -20,13 +20,17 @@ const App = () => {
   const [token, setToken] = useState(false)
   const [cocktails, setCocktails] = useState([])
   const [screen, setScreen] = useState('')
+  const [loadingMsg, setLoadingMsg] = useState('LOADING')
 
+  const [editorCocktailId, setEditorCocktailId] = useState("")
   const [availableMethods, setAvailableMethods] = useState(false)
   const [availableGlasses, setAvailableGlasses] = useState(false)
 
   useEffect(() => {
     const asyncWrapper = async () => {
+      setLoadingMsg(msg => msg + '\nGetting token from local storage')
       const token = await getStorageValue(TOKEN_KEY)
+      setLoadingMsg(msg => msg + (token ? '\nToken aquired' : 'no token in local storage'))
       initialize(token)
     }
     asyncWrapper()
@@ -34,20 +38,23 @@ const App = () => {
   }, [])
 
   const initialize = async (token) => {
-    console.log('initialize')
-    console.log('DEV', __DEV__)
+    setLoadingMsg(msg => msg + '\nInitializing')
     if (!token) {
+      setLoadingMsg(msg => msg + '\nSwitching to login screen')
       return setScreen(screens.LOGIN)
 
     }
 
+    setLoadingMsg(msg => msg + '\nGetting cocktails from API')
     const cocktails = await cocktailsApi.get(token)
-    console.log('cocktails', cocktails.length)
-    console.log
     if (cocktails.error) {
+      setLoadingMsg(msg => msg + '\nError getting cocktails from API, switching to error screen')
+      setScreen(screens.ERROR)
       return console.log('closeLogin error', cocktails.error)
     }
 
+    
+    setLoadingMsg(msg => msg + '\nCocktails aquired. Open viewer')
     setStorageValue(TOKEN_KEY, token)
     setToken(token)
     setCocktails(cocktails)
@@ -59,18 +66,21 @@ const App = () => {
   }
 
   const logout = () => {
+    delStorageValue(TOKEN_KEY)
     setToken(false)
     setCocktails([])
     setScreen(screens.LOGIN)
   }
 
-  const openEditor = async () => {
+  const openEditor = async (cocktailId) => {
+    console.log('openEditor', cocktailId)
     if (!availableMethods || !availableGlasses) {
       const availableMethods = await getAvailable('methods', token)
       const availableGlasses = await getAvailable('glasses', token)
       setAvailableMethods(availableMethods)
       setAvailableGlasses(availableGlasses)
     }
+    setEditorCocktailId(cocktailId ? cocktailId : "")
     setScreen(screens.EDITOR)
   }
 
@@ -114,16 +124,17 @@ const App = () => {
         logout={logout} />
     case screens.EDITOR:
       return <Editor
-        close={closeEditor}
         cocktails={cocktails}
+        selectedId={editorCocktailId}
         availableMethods={availableMethods}
         availableGlasses={availableGlasses}
         save={saveCocktail}
-        delete={deleteCocktail} />
+        delete={deleteCocktail}
+        close={closeEditor} />
     case screens.ERROR:
       return <View><Text>ERROR</Text></View>
     default:
-      return <View><Text>LOADING</Text></View>
+      return <View><Text>{loadingMsg}</Text></View>
   }
 }
 

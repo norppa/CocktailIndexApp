@@ -40,7 +40,6 @@ const getCocktails = async (token) => {
             'Accept': 'application/json'
         }
     }
-    console.log('GET', url, request)
 
     try {
         const result = await fetch(url, request)

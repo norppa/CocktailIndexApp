@@ -1,11 +1,35 @@
 import React, { useState } from 'react'
-import { StyleSheet, Text, View, Image, TouchableWithoutFeedback, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableWithoutFeedback, FlatList, SwitchComponent } from 'react-native'
+import { Menu, MenuOptions, MenuOption, MenuTrigger, renderers } from 'react-native-popup-menu'
 import images from '../../assets/images/glasses'
 
 const Cocktail = (props) => {
     const [showAdditionalInfo, setShowAdditionalInfo] = useState(false)
+    const [menuIsOpen, setMenuIsOpen] = useState(false)
 
-    const handleClick = () => setShowAdditionalInfo(showAdditionalInfo => !showAdditionalInfo)
+    const handleClick = () => {
+        setShowAdditionalInfo(showAdditionalInfo => !showAdditionalInfo)
+    }
+
+    const handleLongPress = () => {
+        setMenuIsOpen(true)
+    }
+
+    const menuSelect = (value) => {
+        switch (value) {
+            case 'edit':
+                props.openEditor(props.cocktail.id)
+                break
+            case 'new':
+                props.openEditor('')
+                break
+            case 'delete':
+                console.log('delete not implemented')
+                break
+            default: { }
+        }
+        setMenuIsOpen(false)
+    }
 
     const CocktailText = props => {
         return (
@@ -35,47 +59,73 @@ const Cocktail = (props) => {
 
     }
 
-    if (!showAdditionalInfo) {
+    const { Popover } = renderers
+
+    const Contents = () => {
+        if (!showAdditionalInfo) {
+            return <Text style={styles.name}>{props.cocktail.name}</Text>
+        }
+
         return (
-            <TouchableWithoutFeedback onPress={handleClick}>
-                <View style={[styles.itemCard, props.selected ? styles.selected : null]}>
-                    <Text style={styles.name}>{props.cocktail.name}</Text>
-                </View>
-            </TouchableWithoutFeedback>
-        )
-    } else {
-        return (
-            <TouchableWithoutFeedback onPress={handleClick}>
-                <View style={[styles.itemCard, props.selected ? styles.selected : null]}>
-                    <View style={styles.headerRow}>
-                        <Text style={styles.header}>{props.cocktail.name}</Text>
-                        <View style={styles.instructions}>
-                            <GlassImg />
-                            <Text style={styles.method}> {props.cocktail.method}</Text>
-                        </View>
+            <>
+                <View style={styles.headerRow}>
+                    <Text style={styles.header}>{props.cocktail.name}</Text>
+                    <View style={styles.instructions}>
+                        <GlassImg />
+                        <Text style={styles.method}> {props.cocktail.method}</Text>
                     </View>
-
-                    <FlatList
-                        style={styles.ingredients}
-                        data={props.cocktail.ingredients}
-                        keyExtractor={(item, index) => item.id + '_ingredient_' + index}
-                        renderItem={({ item }) => {
-                            return <CocktailText style={styles.ingredient}>{`\u2022 ${item.amount} ${item.name}`} </CocktailText>
-                        }}
-                    />
-
-                    <GarnishText />
-
-                    <InfoText />
-
                 </View>
-            </TouchableWithoutFeedback>
+
+                <FlatList
+                    style={styles.ingredients}
+                    data={props.cocktail.ingredients}
+                    keyExtractor={(item, index) => item.id + '_ingredient_' + index}
+                    renderItem={({ item }) => {
+                        return <CocktailText style={styles.ingredient}>{`\u2022 ${item.amount} ${item.name}`} </CocktailText>
+                    }}
+                />
+
+                <GarnishText />
+
+                <InfoText />
+            </>
         )
     }
+
+    return (
+        <TouchableWithoutFeedback onPress={handleClick} onLongPress={handleLongPress}>
+            <View style={[styles.itemCard, props.selected ? styles.selected : null]}>
+                <Contents />
+
+                <Menu
+                    style={styles.menu}
+                    opened={menuIsOpen}
+                    onBackdropPress={setMenuIsOpen.bind(this, false)}
+                    onSelect={menuSelect}
+                    renderer={Popover}
+                    rendererProps={{ placement: 'bottom' }}>
+                    <MenuTrigger />
+                    <MenuOptions style={styles.menuOptions} customStyles={menuOptionCustomStyles}>
+                        <MenuOption style={styles.cocktailText} value={'edit'} text='Edit' />
+                        <MenuOption value={'delete'} text='Delete' />
+                        <MenuOption value={'new'} text='New Cocktail' />
+                    </MenuOptions>
+
+                </Menu>
+            </View>
+        </TouchableWithoutFeedback>
+    )
 
 }
 
 export default Cocktail
+
+const menuOptionCustomStyles = {
+    optionText: {
+        fontFamily: 'Alegreya-Medium',
+        fontSize: 22
+    }
+}
 
 const styles = StyleSheet.create({
     itemCard: {
@@ -122,5 +172,13 @@ const styles = StyleSheet.create({
     method: {
         fontFamily: 'Alegreya-Bold',
         fontSize: 18,
-    }
+    },
+    menuOptions: {
+        backgroundColor: 'white',
+        margin: -5,
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 10,
+        width: 300,
+    },
 })

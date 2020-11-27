@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { StyleSheet, ScrollView, View } from 'react-native'
 import Icon from 'react-native-vector-icons/Entypo'
 
@@ -37,15 +37,15 @@ const Editor = (props) => {
     const nameInput = useRef(null)
     const ingredientInput = useRef(null)
 
-    const selectCocktail = (selectedId) => {
-        if (selectedId) {
+    useEffect(() => {
+        if (props.selectedId) {
             const {
                 id,
                 name,
                 ingredients,
                 method,
                 glass
-            } = props.cocktails.find(cocktail => cocktail.id === selectedId)
+            } = props.cocktails.find(cocktail => cocktail.id === props.selectedId)
 
             setId(id)
             setName(name)
@@ -61,7 +61,7 @@ const Editor = (props) => {
             }, new Set())
         ).sort())
         setSelected(name || 'New Cocktail')
-    }
+    }, [])
 
     const selectMethod = (selectedMethod) => {
         setMethod(selectedMethod)
@@ -136,12 +136,6 @@ const Editor = (props) => {
 
     return (
         <ScrollView style={styles.editor}>
-
-            <SelectCocktailDialog
-                visible={!selected}
-                close={props.close}
-                cocktails={props.cocktails}
-                selectCocktail={selectCocktail} />
 
             <IngredientNameDialog
                 visible={dialog === 'ingredient'}
