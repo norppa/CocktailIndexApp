@@ -20,7 +20,8 @@ const Viewer = (props) => {
         style={styles.list}
         data={cocktailList}
         renderItem={({ item }) => <Cocktail cocktail={item} openEditor={props.openEditor} />}
-        keyExtractor={(item, index) => index + item.name} />
+        keyExtractor={(item, index) => index + item.name}
+        ListFooterComponent={<View style={styles.spacer} />} />
     } else {
       return <Text style={styles.text}>No cocktails found</Text>
     }
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
     marginHorizontal: '5%',
     marginTop: 20,
     alignItems: 'center',
-    flex: 1
+    flex: 1,
   },
   controls: {
     width: '100%',
@@ -86,4 +87,7 @@ const styles = StyleSheet.create({
       borderColor: 'black',
       borderRadius: 10,
   },
+  spacer: {
+    marginBottom: 120
+  }
 })
