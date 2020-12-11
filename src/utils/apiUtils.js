@@ -31,7 +31,8 @@ const login = async (username, password) => {
     }
 }
 
-const getCocktails = async (token) => {
+const getCocktails = async (token, logger = () => {}) => {
+    logger('getCocktails called')
     const url = baseUrl + '/cocktails'
     const request = {
         method: 'GET',
@@ -40,9 +41,12 @@ const getCocktails = async (token) => {
             'Accept': 'application/json'
         }
     }
+    logger('url and request created')
 
     try {
+        logger('inside try')
         const result = await fetch(url, request)
+        logger('result got')
         if (result.status != 200) {
             console.log('bad status', result.status)
             return { error: result, msg: 'Failed to fetch cocktails' }

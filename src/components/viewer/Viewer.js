@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, View, FlatList } from 'react-native'
-import Icon from 'react-native-vector-icons/Entypo'
+import EntypoIcon from 'react-native-vector-icons/Entypo'
+import IoniconIcon from 'react-native-vector-icons/Ionicons'
 import { MenuProvider, Menu, MenuOptions, MenuOption, MenuTrigger} from 'react-native-popup-menu'
 
 import Cocktail from './Cocktail'
@@ -19,7 +20,7 @@ const Viewer = (props) => {
       return <FlatList
         style={styles.list}
         data={cocktailList}
-        renderItem={({ item }) => <Cocktail cocktail={item} actions={props.actions} />}
+        renderItem={({ item }) => <Cocktail cocktail={item} actions={props.actions} offline={props.offline} />}
         keyExtractor={(item, index) => index + item.name}
         ListFooterComponent={<View style={styles.spacer} />} />
     } else {
@@ -31,13 +32,16 @@ const Viewer = (props) => {
     <MenuProvider>
       <View style={styles.viewer}>
         <View style={styles.controls}>
+          {props.offline && <IoniconIcon name="cloud-offline" size={35} />}
           <TextInput style={styles.search} value={searchInput} onChange={event => setSearchInput(event.nativeEvent.text)} />
           <Menu>
             <MenuTrigger>
-              <Icon name="menu" size={35} />
+              <EntypoIcon name="menu" size={35} />
             </MenuTrigger>
             <MenuOptions style={styles.menuOptions} customStyles={menuOptionCustomStyles}>
               <MenuOption onSelect={props.actions.logout} text='Logout' />
+              <MenuOption onSelect={props.actions.showLoadingMsg} text='Show Log' />
+              <MenuOption onSelect={props.actions.toggleOfflineMode} text={props.offline ? 'Online mode' : 'Offline mode'} />
               {/* <MenuOption onSelect={props.actions.debug} text='Debug' /> */}
             </MenuOptions>
           </Menu>
@@ -75,8 +79,9 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   search: {
-    width: '80%',
-    marginRight: 10
+    flexGrow: 1,
+    marginRight: 10,
+    marginLeft: 10
   },
   list: {
     width: '100%',

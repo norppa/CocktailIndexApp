@@ -59,7 +59,7 @@ const Cocktail = (props) => {
 
     }
 
-    const { Popover } = renderers
+    const { Popover, SlideInMenu, ContextMenu } = renderers
 
     const Contents = () => {
         if (!showAdditionalInfo) {
@@ -92,26 +92,36 @@ const Cocktail = (props) => {
         )
     }
 
+    // const EditMenu = () => {
+    //     if (props.offline) return null
+
+    //     return (
+
+    //     )
+    // }
+
     return (
         <TouchableWithoutFeedback onPress={handleClick} onLongPress={handleLongPress}>
             <View style={[styles.itemCard, props.selected ? styles.selected : null]}>
+                {!props.offline &&
+                    <Menu
+                        style={styles.menu}
+                        opened={menuIsOpen}
+                        onBackdropPress={setMenuIsOpen.bind(this, false)}
+                        onSelect={menuSelect}
+                        renderer={Popover}
+                        rendererProps={{ placement: 'top' }}>
+                        <MenuTrigger />
+                        <MenuOptions style={styles.menuOptions} customStyles={menuOptionCustomStyles}>
+                            <MenuOption style={styles.cocktailText} value={'edit'} text='Edit' />
+                            <MenuOption value={'delete'} text='Delete' />
+                            <MenuOption value={'new'} text='New Cocktail' />
+                        </MenuOptions>
+                    </Menu>
+                }
                 <Contents />
 
-                <Menu
-                    style={styles.menu}
-                    opened={menuIsOpen}
-                    onBackdropPress={setMenuIsOpen.bind(this, false)}
-                    onSelect={menuSelect}
-                    renderer={Popover}
-                    rendererProps={{ placement: 'bottom' }}>
-                    <MenuTrigger />
-                    <MenuOptions style={styles.menuOptions} customStyles={menuOptionCustomStyles}>
-                        <MenuOption style={styles.cocktailText} value={'edit'} text='Edit' />
-                        <MenuOption value={'delete'} text='Delete' />
-                        <MenuOption value={'new'} text='New Cocktail' />
-                    </MenuOptions>
 
-                </Menu>
             </View>
         </TouchableWithoutFeedback>
     )

@@ -8,6 +8,7 @@ import Editor from './src/components/editor/Editor'
 import Login from './src/components/login/Login'
 
 const screens = {
+  LOG: 'log',
   LOGIN: 'login',
   VIEWER: 'viewer',
   EDITOR: 'editor',
@@ -15,50 +16,59 @@ const screens = {
 }
 
 const TOKEN_KEY = '@CocktailIndexToken'
+const COCKTAILS_KEY = '@CocktailIndexCocktails'
 
 const App = () => {
   const [token, setToken] = useState(false)
   const [cocktails, setCocktails] = useState([])
-  const [screen, setScreen] = useState('')
-  const [loadingMsg, setLoadingMsg] = useState('LOADING')
+  const [screen, setScreen] = useState(screens.VIEWER)
+  const [logText, setLogText] = useState((new Date).toUTCString())
+  const [offlineMode, setOfflineMode] = useState(true)
 
   const [editorCocktailId, setEditorCocktailId] = useState("")
   const [availableMethods, setAvailableMethods] = useState(false)
   const [availableGlasses, setAvailableGlasses] = useState(false)
 
+  const log = (text) => {
+    setLogText(logText => logText + '\n' + text)
+  }
+
   useEffect(() => {
     const asyncWrapper = async () => {
-      setLoadingMsg(msg => msg + '\nGetting token from local storage')
+      log('Getting token from local storage')
       const token = await getStorageValue(TOKEN_KEY)
-      setLoadingMsg(msg => msg + (token ? '\nToken aquired' : 'no token in local storage'))
-      initialize(token)
+      log(token ? 'Token aquired' : 'no token in local storage')
+      let cocktails = await getStorageValue(COCKTAILS_KEY)
+      log(cocktails ? 'Cocktails fetched from local storage' : 'No cocktails found from local storage')
+      initialize(token, JSON.parse(cocktails))
     }
     asyncWrapper()
 
   }, [])
 
-  const initialize = async (token) => {
-    setLoadingMsg(msg => msg + '\nInitializing')
+  const initialize = async (token, cocktails) => {
+    log('Initializing')
     if (!token) {
-      setLoadingMsg(msg => msg + '\nSwitching to login screen')
+      log('Switching to login screen')
       return setScreen(screens.LOGIN)
-
     }
 
-    setLoadingMsg(msg => msg + '\nGetting cocktails from API')
-    const cocktails = await cocktailsApi.get(token)
-    if (cocktails.error) {
-      setLoadingMsg(msg => msg + '\nError getting cocktails from API, switching to error screen')
-      setScreen(screens.ERROR)
-      return console.log('closeLogin error', cocktails.error)
-    }
-
-    
-    setLoadingMsg(msg => msg + '\nCocktails aquired. Open viewer')
-    setStorageValue(TOKEN_KEY, token)
-    setToken(token)
     setCocktails(cocktails)
     setScreen(screens.VIEWER)
+
+    log('Getting cocktails from API')
+    const apiCocktails = await cocktailsApi.get(token, log)
+    if (apiCocktails.error) {
+      log('Error getting cocktails from API, remaining in offline mode')
+      log(JSON.stringify(apiCocktails.error))
+      return
+    }
+    log('Cocktails aquired. Opening viewer')
+    setStorageValue(TOKEN_KEY, token)
+    setStorageValue(COCKTAILS_KEY, JSON.stringify(apiCocktails))
+    setOfflineMode(false)
+    setToken(token)
+    setCocktails(apiCocktails)
   }
 
   const closeLogin = async (token) => {
@@ -89,7 +99,6 @@ const App = () => {
 
   const saveCocktail = async (cocktail) => {
     const storedCocktail = await cocktailsApi.save(token, cocktail)
-    // console.log('saveCocktail, storedCocktail', storedCocktail)
     if (cocktail.id) {
       setCocktails(cocktails => cocktails.map(c => {
         if (c.id == cocktail.id) {
@@ -113,13 +122,29 @@ const App = () => {
     setScreen(screens.VIEWER)
   }
 
+  const showLoadingMsg = () => {
+    setScreen('')
+    setTimeout(() => setScreen(screens.VIEWER), 5000)
+  }
+
+  const toggleOfflineMode = () => {
+    console.log('token', token)
+    console.log('cocktails', cocktails)
+    if (offlineMode) {
+      initialize(token, cocktails)
+    } else {
+      setOfflineMode(true)
+    }
+  }
+
   switch (screen) {
     case screens.LOGIN:
       return <Login close={closeLogin} />
     case screens.VIEWER:
       return <Viewer
         cocktails={cocktails}
-        actions={{openEditor, deleteCocktail, logout}} />
+        actions={{ openEditor, deleteCocktail, logout, showLoadingMsg, toggleOfflineMode }}
+        offline={offlineMode} />
     case screens.EDITOR:
       return <Editor
         cocktails={cocktails}
@@ -131,8 +156,9 @@ const App = () => {
         close={closeEditor} />
     case screens.ERROR:
       return <View><Text>ERROR</Text></View>
+    case screens.LOG:
     default:
-      return <View><Text>{loadingMsg}</Text></View>
+      return <View><Text>{logText}</Text></View>
   }
 }
 
