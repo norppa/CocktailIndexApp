@@ -12,10 +12,13 @@ const Viewer = (props) => {
   const [cocktailList, setCocktailList] = useState(props.cocktails)
 
   useEffect(() => {
+    console.log('viewer useEffect', props.cocktails)
     setCocktailList(props.cocktails.filter(cocktail => cocktail.name.toLowerCase().includes(searchInput.toLowerCase())))
   }, [searchInput, props.cocktails])
 
   const CocktailList = () => {
+    console.log('props.cocktails', props.cocktails)
+    console.log('cocktailList', cocktailList)
     if (cocktailList.length > 0) {
       return <FlatList
         style={styles.list}
@@ -42,6 +45,8 @@ const Viewer = (props) => {
               <MenuOption onSelect={props.actions.logout} text='Logout' />
               <MenuOption onSelect={props.actions.showLoadingMsg} text='Show Log' />
               <MenuOption onSelect={props.actions.toggleOfflineMode} text={props.offline ? 'Online mode' : 'Offline mode'} />
+              <MenuOption onSelect={props.actions.clearLocalCocktails} text="Clear Local Cocktails" />
+
               {/* <MenuOption onSelect={props.actions.debug} text='Debug' /> */}
             </MenuOptions>
           </Menu>

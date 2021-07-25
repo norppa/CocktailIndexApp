@@ -20,6 +20,7 @@ const Login = (props) => {
 
         setBusy(true)
         const response = await login(usernameValue, passwordValue)
+        console.log('response received')
         setBusy(false)
         if (response.error) {
             setError('Could not log in: ' + JSON.stringify(response.msg), 20000)

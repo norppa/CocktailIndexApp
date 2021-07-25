@@ -38,9 +38,13 @@ const App = () => {
       log('Getting token from local storage')
       const token = await getStorageValue(TOKEN_KEY)
       log(token ? 'Token aquired' : 'no token in local storage')
-      let cocktails = await getStorageValue(COCKTAILS_KEY)
+      console.log('token', token)
+      const cocktails = await getStorageValue(COCKTAILS_KEY)
+      console.log('cocktails', cocktails)
       log(cocktails ? 'Cocktails fetched from local storage' : 'No cocktails found from local storage')
-      initialize(token, JSON.parse(cocktails))
+      const cocktailList = cocktails ? JSON.parse(cocktails) : []
+      console.log('cocktailList', cocktailList)
+      initialize(token, cocktailList)
     }
     asyncWrapper()
 
@@ -72,7 +76,8 @@ const App = () => {
   }
 
   const closeLogin = async (token) => {
-    await initialize(token)
+    console.log('closeLogin', token)
+    await initialize(token, cocktails)
   }
 
   const logout = () => {
@@ -137,13 +142,17 @@ const App = () => {
     }
   }
 
+  const clearLocalCocktails = () => {
+    delStorageValue(COCKTAILS_KEY)
+  }
+
   switch (screen) {
     case screens.LOGIN:
       return <Login close={closeLogin} />
     case screens.VIEWER:
       return <Viewer
         cocktails={cocktails}
-        actions={{ openEditor, deleteCocktail, logout, showLoadingMsg, toggleOfflineMode }}
+        actions={{ openEditor, deleteCocktail, logout, showLoadingMsg, toggleOfflineMode, clearLocalCocktails }}
         offline={offlineMode} />
     case screens.EDITOR:
       return <Editor

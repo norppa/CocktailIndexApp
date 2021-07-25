@@ -15,9 +15,11 @@ const login = async (username, password) => {
         },
         body: JSON.stringify({ username: username, password: password })
     }
-
+    console.log('url and request formulated')
     try {
+        console.log('tryin')
         const result = await fetch(url, request)
+        console.log('result aquired')
         if (result.status != 200) {
             console.log('bad status', result.status)
             return { error: result, msg: 'Could not log in' }
